@@ -4,10 +4,7 @@ const request = async (
   endpoint,
   method = 'GET',
   body = null,
-  isAuthRequest = false,
 ) => {
-  // Pour l'API Pokémon, nous n'avons pas besoin d'authentification
-  // mais gardons la structure de base pour d'éventuelles futures fonctionnalités
   const headers = {
     'Content-Type': 'application/json',
   };

@@ -19,6 +19,18 @@ export default {
       return this.pokemonStore?.error
     }
   },
+  watch: {
+    '$route.query.search': 'fetchPokemons'
+  },
+  methods: {
+    async fetchPokemons() {
+      const searchQuery = this.$route.query.search || ''
+      await this.pokemonStore.fetchPokemons(1, searchQuery)
+    },
+    goToPokemonDetail(id) {
+      this.$router.push({ name: 'pokemon-detail', params: { id } })
+    }
+  },
   created() {
     this.pokemonStore = usePokemonStore()
     this.pokemonStore.fetchPokemons()
@@ -27,7 +39,6 @@ export default {
 </script>
 <template>
   <div class="home">
-    <h1>Pokémon Store</h1>
     <div v-if="loading" class="loading">
       Chargement des Pokémon...
     </div>
@@ -35,7 +46,7 @@ export default {
       {{ error }}
     </div>
     <div v-else class="pokemon-grid">
-      <div v-for="pokemon in pokemons" :key="pokemon.id" class="pokemon-card">
+      <div v-for="pokemon in pokemons" :key="pokemon.id" class="pokemon-card" @click="goToPokemonDetail(pokemon.id)">
         <img :src="pokemon.image" :alt="pokemon.name">
         <h3>{{ pokemon.name }}</h3>
         <p>Prix: {{ pokemon.price }} €</p>
