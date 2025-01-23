@@ -22,22 +22,50 @@ export default {
   watch: {
     '$route.query.search': 'fetchPokemons'
   },
-  methods: {
+   methods: {
     async fetchPokemons() {
       const searchQuery = this.$route.query.search || ''
-      await this.pokemonStore.fetchPokemons(1, searchQuery)
+      if (searchQuery) {
+        await this.pokemonStore.searchPokemonByName(searchQuery)
+      } else {
+        await this.pokemonStore.fetchPokemons(1)
+       }
+      this.updateCurrentPage()
     },
     goToPokemonDetail(id) {
       this.$router.push({ name: 'pokemon-detail', params: { id } })
+    },
+    attachPaginationEvents() {
+      const store = this.pokemonStore
+      document.getElementById('prevPage').addEventListener('click', () => {
+        store.previousPage().then(this.updateCurrentPage)
+      })
+
+      document.getElementById('nextPage').addEventListener('click', () => {
+        store.nextPage().then(this.updateCurrentPage)
+      })
+    },
+    updateCurrentPage() {
+      document.getElementById('currentPage').textContent = `Page: ${this.pokemonStore.currentPage} / ${this.pokemonStore.totalPages}`
     }
   },
   created() {
     this.pokemonStore = usePokemonStore()
     this.pokemonStore.fetchPokemons()
+  },
+    mounted() {
+    this.attachPaginationEvents()
+    this.updateCurrentPage()
   }
 }
 </script>
 <template>
+  <div class="searchBar">
+    <img src="@/assets/icons/search.svg" alt="Rechercher" />
+    <input type="text" v-model="searchQuery" placeholder="Rechercher un Pokémon" />
+    <button @click="searchPokemon">Rechercher</button>
+  </div>
+  
   <div class="home">
     <div v-if="loading" class="loading">
       Chargement des Pokémon...
@@ -53,6 +81,11 @@ export default {
       </div>
     </div>
   </div>
+  <footer>
+    <button id="prevPage">Previous Page</button>
+    <span id="currentPage">Page : 1</span>
+    <button id="nextPage">Next Page</button>
+  </footer>
 </template>
 
 <style>

@@ -1,5 +1,7 @@
 <template>
-  <button @click="goBack">Retour à la liste</button>
+  <router-link to="/">
+    <button>Retour</button>
+  </router-link>
   <div v-if="loading" class="loading">
     Chargement des détails du Pokémon...
   </div>
@@ -44,9 +46,6 @@ export default {
       } finally {
         this.loading = false
       }
-    },
-    goBack() {
-      this.$router.push({ name: 'pokemon-list' })
     }
   }
 }

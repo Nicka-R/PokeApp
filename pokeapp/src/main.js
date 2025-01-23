@@ -10,23 +10,11 @@ app.use(createPinia())
 app.use(router)
 
 const store = usePokemonStore()
-router.isReady().then(() => {
-  if (router.currentRoute.value.name === 'pokemon-list') {
-    document.getElementById('prevPage').addEventListener('click', () => {
-      store.previousPage().then(updateCurrentPage)
-    })
+// if(document.getElementById('currentPage'))
+// document.getElementById('currentPage').textContent = `Page: ${store.currentPage} / ${store.totalPages}`;
 
-    document.getElementById('nextPage').addEventListener('click', () => {
-      store.nextPage().then(updateCurrentPage)
-    })
+// Initial fetch
+store.fetchPokemons().then()
 
-    function updateCurrentPage() {
-      document.getElementById('currentPage').textContent = `Page: ${store.currentPage} / ${store.totalPages}`
-    }
-
-    // Initial fetch
-    store.fetchPokemons().then(updateCurrentPage)
-  }
-})
 
 app.mount('#app')

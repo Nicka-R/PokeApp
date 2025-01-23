@@ -1,6 +1,6 @@
-
 import { defineStore } from 'pinia'
 import { request } from '@/services/httpClient'
+
 export const usePokemonStore = defineStore('pokemon', {
   state: () => ({
     pokemons: [],
@@ -39,6 +39,39 @@ export const usePokemonStore = defineStore('pokemon', {
         this.loading = false
       }
     },
+    async searchPokemonByName(name) {
+      this.loading = true
+      try {
+        let allPokemonDetails = []
+        let offset = 0
+        const limit = 300
+        let hasMore = true
+
+        while (hasMore) {
+          const response = await request(`/pokemon?limit=${limit}&offset=${offset}`)
+          const pokemonDetails = await Promise.all(
+            response.results.map(async (pokemon) => {
+              const details = await request(pokemon.url.replace('https://pokeapi.co/api/v2', ''))
+              return {
+                id: details.id,
+                name: details.name,
+                image: details.sprites.front_default,
+                price: details.base_experience
+              }
+            })
+          )
+          allPokemonDetails = allPokemonDetails.concat(pokemonDetails)
+          offset += limit
+          hasMore = response.results.length === limit
+        }
+
+        this.pokemons = allPokemonDetails.filter(pokemon => pokemon.name.toLowerCase().includes(name.toLowerCase()))
+      } catch (error) {
+        this.error = "No Pokémon found with that name"
+      } finally {
+        this.loading = false
+      }
+    },
     async fetchPokemonDetails(id) {
       this.loading = true
       try {
@@ -50,7 +83,7 @@ export const usePokemonStore = defineStore('pokemon', {
           price: details.base_experience,
           type: details.types.map(typeInfo => typeInfo.type.name).join(', '),
           weight: details.weight / 10, 
-          height: details.height / 10 
+          height: details.height / 10
         }
       } catch (error) {
         this.error = error.message
