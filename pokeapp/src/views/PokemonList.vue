@@ -2,10 +2,11 @@
 import { usePokemonStore } from '@/stores/pokemon'
 
 export default {
-  name: 'HomeView',
+  name: 'pokemon-list',
   data() {
     return {
-      pokemonStore: null
+      pokemonStore: null,
+      searchQuery: ''
     }
   },
   computed: {
@@ -31,6 +32,10 @@ export default {
         await this.pokemonStore.fetchPokemons(1)
        }
       this.updateCurrentPage()
+     },
+    searchPokemon() {
+      this.pokemonStore.searchPokemonByName(this.searchQuery)
+      this.$router.push({ name: 'pokemon-list', query: { search: this.searchQuery } })
     },
     goToPokemonDetail(id) {
       this.$router.push({ name: 'pokemon-detail', params: { id } })
@@ -77,7 +82,7 @@ export default {
       <div v-for="pokemon in pokemons" :key="pokemon.id" class="pokemon-card" @click="goToPokemonDetail(pokemon.id)">
         <img :src="pokemon.image" :alt="pokemon.name">
         <h3>{{ pokemon.name }}</h3>
-        <p>Prix: {{ pokemon.price }} €</p>
+        <p>{{ pokemon.price }} €</p>
       </div>
     </div>
   </div>
