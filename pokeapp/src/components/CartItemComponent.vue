@@ -1,16 +1,3 @@
-<template>
-  <div class="cart-item">
-    <img :src="item.image" :alt="item.name" />
-    <div>
-      <h3>{{ item.name }}</h3>
-      <p>Prix: {{ item.price }} €</p>
-      <p>Quantité: {{ item.quantity }}</p>
-      <button @click="removeItem">Supprimer</button>
-      <button @click="addToCart">Ajouter</button>
-    </div>
-  </div>
-</template>
-
 <script>
 import { useCartStore } from '@/stores/cart'
 
@@ -34,6 +21,19 @@ export default {
   }
 }
 </script>
+
+<template>
+  <div class="cart-item">
+    <img :src="item.image" :alt="item.name" />
+    <div>
+      <h3>{{ item.name }}</h3>
+      <p>Prix: {{ item.price }} €</p>
+      <p>Quantité: {{ item.quantity }}</p>
+      <button @click="removeItem">Supprimer</button>
+      <button @click="addToCart">Ajouter</button>
+    </div>
+  </div>
+</template>
 
 <style>
 .cart-item {

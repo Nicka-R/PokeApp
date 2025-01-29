@@ -1,35 +1,3 @@
-<template>
-  <div>
-    <div class="searchBar">
-      <img src="@/assets/icons/search.svg" alt="Rechercher" />
-      <input type="text" v-model="searchQuery" placeholder="Rechercher un Pokémon" />
-      <button @click="searchPokemon">Rechercher</button>
-    </div>
-    
-    <div class="home">
-      <div v-if="loading" class="loading">
-        Chargement des Pokémon...
-      </div>
-      <div v-else-if="error" class="error">
-        {{ error }}
-      </div>
-      <div v-else class="pokemon-grid">
-        <div v-for="pokemon in pokemons" :key="pokemon.id" class="pokemon-card" @click="goToPokemonDetail(pokemon.id)">
-          <img :src="pokemon.image" :alt="pokemon.name">
-          <h3>{{ pokemon.name }}</h3>
-          <p>{{ pokemon.price }} €</p>
-          <button @click.stop="addToCart(pokemon)">Ajouter au panier</button>
-        </div>
-      </div>
-    </div>
-    <footer>
-      <button id="prevPage" @click="previousPage">Previous Page</button>
-      <span id="currentPage">Page : {{ currentPage }} / {{ totalPages }}</span>
-      <button id="nextPage" @click="nextPage">Next Page</button>
-    </footer>
-  </div>
-</template>
-
 <script>
 import { usePokemonStore } from '@/stores/pokemon'
 import { useCartStore } from '@/stores/cart'
@@ -101,6 +69,38 @@ export default {
   }
 }
 </script>
+
+<template>
+  <div>
+    <div class="searchBar">
+      <img src="@/assets/icons/search.svg" alt="Rechercher" />
+      <input type="text" v-model="searchQuery" placeholder="Rechercher un Pokémon" />
+      <button @click="searchPokemon">Rechercher</button>
+    </div>
+    
+    <div class="home">
+      <div v-if="loading" class="loading">
+        Chargement des Pokémon...
+      </div>
+      <div v-else-if="error" class="error">
+        {{ error }}
+      </div>
+      <div v-else class="pokemon-grid">
+        <div v-for="pokemon in pokemons" :key="pokemon.id" class="pokemon-card" @click="goToPokemonDetail(pokemon.id)">
+          <img :src="pokemon.image" :alt="pokemon.name">
+          <h3>{{ pokemon.name }}</h3>
+          <p>{{ pokemon.price }} €</p>
+          <button @click.stop="addToCart(pokemon)">Ajouter au panier</button>
+        </div>
+      </div>
+    </div>
+    <footer>
+      <button id="prevPage" @click="previousPage">Previous Page</button>
+      <span id="currentPage">Page : {{ currentPage }} / {{ totalPages }}</span>
+      <button id="nextPage" @click="nextPage">Next Page</button>
+    </footer>
+  </div>
+</template>
 
 <style>
 .pokemon-grid {

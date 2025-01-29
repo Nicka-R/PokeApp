@@ -1,3 +1,17 @@
+<script>
+import { useCartStore } from '@/stores/cart'
+
+export default {
+  name: 'OrderHistoryComponent',
+  computed: {
+    orderHistory() {
+      const store = useCartStore()
+      return store.history
+    }
+  }
+}
+</script>
+
 <template>
   <div class="order-history">
     <h1>Historique des Commandes</h1>
@@ -16,20 +30,6 @@
     </div>
   </div>
 </template>
-
-<script>
-import { useCartStore } from '@/stores/cart'
-
-export default {
-  name: 'OrderHistoryComponent',
-  computed: {
-    orderHistory() {
-      const store = useCartStore()
-      return store.history
-    }
-  }
-}
-</script>
 
 <style>
 .order-history {

@@ -1,24 +1,3 @@
-<template>
-  <div class="order-form">
-    <h1>Passer la commande</h1>
-    <form @submit.prevent="submitOrder">
-      <div>
-        <label for="firstName">Prénom:</label>
-        <input type="text" id="firstName" v-model="firstName" required />
-      </div>
-      <div>
-        <label for="lastName">Nom:</label>
-        <input type="text" id="lastName" v-model="lastName" required />
-      </div>
-      <div>
-        <label for="email">Email:</label>
-        <input type="email" id="email" v-model="email" required />
-      </div>
-      <button type="submit">Confirmer la commande</button>
-    </form>
-  </div>
-</template>
-
 <script>
 import { useCartStore } from '@/stores/cart'
 
@@ -40,6 +19,27 @@ export default {
   }
 }
 </script>
+
+<template>
+  <div class="order-form">
+    <h1>Passer la commande</h1>
+    <form @submit.prevent="submitOrder">
+      <div>
+        <label for="firstName">Prénom:</label>
+        <input type="text" id="firstName" v-model="firstName" required />
+      </div>
+      <div>
+        <label for="lastName">Nom:</label>
+        <input type="text" id="lastName" v-model="lastName" required />
+      </div>
+      <div>
+        <label for="email">Email:</label>
+        <input type="email" id="email" v-model="email" required />
+      </div>
+      <button type="submit">Confirmer la commande</button>
+    </form>
+  </div>
+</template>
 
 <style>
 .order-form {
