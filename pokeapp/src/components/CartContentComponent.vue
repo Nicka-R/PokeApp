@@ -14,7 +14,7 @@
       <div class="total-price">
         <h2>Prix Total: {{ totalPrice }} €</h2>
       </div>
-      <button @click="placeOrder">Passer la commande</button>
+        <router-link to="/order"><button>Passer la commande</button></router-link>
     </div>
   </div>
 </template>
@@ -35,12 +35,6 @@ export default {
     },
     totalPrice() {
       return this.cartItems.reduce((total, item) => total + item.price * item.quantity, 0)
-    }
-  },
-  methods: {
-    placeOrder() {
-      const store = useCartStore()
-      store.placeOrder()
     }
   }
 }

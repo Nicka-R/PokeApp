@@ -26,7 +26,7 @@ export const useCartStore = defineStore('cart', {
     placeOrder() {
       if (this.items.length > 0) {
         const order = {
-          id: Date.now(), // Unique ID for the order
+          id: Date.now(),
           date: new Date().toLocaleString(),
           items: [...this.items]
         }
