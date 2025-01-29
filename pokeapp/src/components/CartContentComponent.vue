@@ -1,12 +1,14 @@
 <script>
 import { useCartStore } from '@/stores/cart'
 import CartItemComponent from './CartItemComponent.vue'
+import cartValidationMixin from '../mixins/cartVaildationMixin.js'
 
 export default {
   name: 'CartContentComponent',
   components: {
     CartItemComponent
   },
+  mixins: [cartValidationMixin],
   computed: {
     cartItems() {
       const store = useCartStore()
@@ -14,6 +16,12 @@ export default {
     },
     totalPrice() {
       return this.cartItems.reduce((total, item) => total + item.price * item.quantity, 0)
+    }
+  },
+  methods: {
+    proceedToOrder() {
+      this.validateCart()
+      this.$router.push('/order')
     }
   }
 }
@@ -35,7 +43,7 @@ export default {
       <div class="total-price">
         <h2>Prix Total: {{ totalPrice }} €</h2>
       </div>
-        <router-link to="/order"><button>Passer la commande</button></router-link>
+      <button @click="proceedToOrder">Passer la commande</button>
     </div>
   </div>
 </template>

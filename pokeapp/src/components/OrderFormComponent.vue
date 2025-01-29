@@ -1,8 +1,10 @@
 <script>
+import cartValidationMixin from '../mixins/cartVaildationMixin.js'
 import { useCartStore } from '@/stores/cart'
 
 export default {
   name: 'OrderFormComponent',
+  mixins: [cartValidationMixin],
   data() {
     return {
       firstName: '',
@@ -12,6 +14,7 @@ export default {
   },
   methods: {
     submitOrder() {
+      this.validateOrderForm()
       const cartStore = useCartStore()
       cartStore.placeOrder()
       this.$router.push({ name: 'order-confirmation', query: { firstName: this.firstName, lastName: this.lastName, email: this.email } })
