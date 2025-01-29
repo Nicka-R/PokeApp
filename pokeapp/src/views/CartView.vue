@@ -18,7 +18,8 @@ export default {
 </script>
 
 <template>
-      <div class="cart-view">
+  <router-link to="/"><button>Retour à la liste des pokémons</button></router-link>
+  <div class="cart-view">
     <h1>Mon Panier</h1>
     <div v-if="cartItems.length === 0">
       <p>Votre panier est vide.</p>

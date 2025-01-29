@@ -2,7 +2,7 @@
 import { useCartStore } from '@/stores/cart'
 
 export default {
-  name: 'CartComponent',
+  name: 'CartHeaderComponent',
   computed: {
     cartItemCount() {
       const store = useCartStore()
