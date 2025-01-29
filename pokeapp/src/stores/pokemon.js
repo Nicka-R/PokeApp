@@ -90,10 +90,25 @@ export const usePokemonStore = defineStore('pokemon', {
           price: details.base_experience,
           type: details.types.map(typeInfo => typeInfo.type.name).join(', '),
           weight: details.weight / 10,
-          height: details.height / 10
+          height: details.height / 10,
+          abilities: details.abilities.map(ability => ability.ability.name).join(', '),
+          moves: details.moves.map(moveInfo => moveInfo.move.name).slice(0, 5).join(', ')
+
         }
       } catch (error) {
         throw error
+      }
+    },
+    async nextPage() {
+      if (this.currentPage < this.totalPages) {
+        this.currentPage += 1
+        this.fetchPokemons(this.currentPage)
+      }
+    },
+    async previousPage() {
+      if (this.currentPage > 1) {
+        this.currentPage -= 1
+        this.fetchPokemons(this.currentPage)
       }
     }
   }
