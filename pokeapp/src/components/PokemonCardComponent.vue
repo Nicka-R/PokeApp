@@ -36,7 +36,7 @@ export default {
     },
     addToCart() {
       const store = useCartStore()
-      store.addToCart(this.pokemon.id)
+      store.addToCart(this.pokemon)
     }
   }
 }

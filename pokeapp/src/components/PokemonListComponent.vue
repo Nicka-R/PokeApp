@@ -18,7 +18,7 @@
           <img :src="pokemon.image" :alt="pokemon.name">
           <h3>{{ pokemon.name }}</h3>
           <p>{{ pokemon.price }} €</p>
-          <button @click.stop="addToCart(pokemon.id)">Ajouter au panier</button>
+          <button @click.stop="addToCart(pokemon)">Ajouter au panier</button>
         </div>
       </div>
     </div>
@@ -79,9 +79,9 @@ export default {
     goToPokemonDetail(id) {
       this.$router.push({ name: 'pokemon-detail', params: { id } })
     },
-    addToCart(pokemonId) {
+    addToCart(pokemon) {
       const cartStore = useCartStore()
-      cartStore.addToCart(pokemonId)
+      cartStore.addToCart(pokemon)
     },
     previousPage() {
       this.pokemonStore.previousPage().then(this.updateCurrentPage)

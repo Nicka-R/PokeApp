@@ -2,17 +2,45 @@ import { defineStore } from 'pinia'
 
 export const useCartStore = defineStore('cart', {
   state: () => ({
-    items: []
+    items: [],
+    orderHistory: []
   }),
   actions: {
-    addToCart(pokemon) {
-      this.items.push(pokemon)
+    addToCart(pokemon, quantity = 1) {
+      const existingItem = this.items.find(item => item.id === pokemon.id)
+      if (existingItem) {
+        existingItem.quantity += quantity
+      } else {
+        this.items.push({ ...pokemon, quantity })
+      }
     },
-    removeFromCart(pokemonId) {
-      this.items = this.items.filter(item => item.id !== pokemonId)
+    removeFromCart(pokemonId, quantity = 1) {
+      const existingItem = this.items.find(item => item.id === pokemonId)
+      if (existingItem) {
+        existingItem.quantity -= quantity
+        if (existingItem.quantity <= 0) {
+          this.items = this.items.filter(item => item.id !== pokemonId)
+        }
+      }
+    },
+    placeOrder() {
+      if (this.items.length > 0) {
+        const order = {
+          id: Date.now(), // Unique ID for the order
+          date: new Date().toLocaleString(),
+          items: [...this.items]
+        }
+        this.orderHistory.push(order)
+        this.clearCart()
+      }
     },
     clearCart() {
       this.items = []
+    }
+  },
+  getters: {
+    history() {
+      return this.orderHistory
     }
   }
 })
