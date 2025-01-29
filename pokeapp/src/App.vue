@@ -1,17 +1,17 @@
 <template>
 <main>
   <header>
-  <CartComponent /> 
+  <CartHeaderComponent /> 
   </header>
   <RouterView />
 </main>
 </template>
 
 <script>
-import CartComponent from '@/components/CartComponent.vue'
+import CartHeaderComponent from '@/components/CartHeaderComponent.vue'
 export default {
   components: {
-    CartComponent
+    CartHeaderComponent
   }
 }
 </script>
