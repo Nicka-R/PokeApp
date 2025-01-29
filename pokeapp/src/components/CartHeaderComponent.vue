@@ -16,7 +16,10 @@ export default {
 <template>
     <router-link to="/"><h1>Pokéapp</h1></router-link>
     <router-link to="/cart">
-      <img src="../assets/icons/cart.svg" alt="Panier" />
-      <span>{{ cartItemCount }}</span>
+      <div>
+        <img src="../assets/icons/cart.svg" alt="Panier" />
+        <span>{{ cartItemCount }}</span>
+      </div>
+      <router-link to="/order-history">Historique des commandes</router-link>
     </router-link>
 </template>
