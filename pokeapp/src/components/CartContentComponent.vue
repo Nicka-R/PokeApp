@@ -20,7 +20,6 @@ export default {
   },
   methods: {
     proceedToOrder() {
-      this.validateCart()
       this.$router.push('/order')
     }
   }

@@ -1,9 +1,12 @@
 <script>
 import { usePokemonStore } from '@/stores/pokemon'
 import { useCartStore } from '@/stores/cart'
-
+import hightlight from '@/directive/hightlight';
 export default {
   name: 'PokemonListComponent',
+  directives: {
+    hightlight
+  },
   data() {
     return {
       pokemonStore: usePokemonStore(),
@@ -86,8 +89,8 @@ export default {
         {{ error }}
       </div>
       <div v-else class="pokemon-grid">
-        <div v-for="pokemon in pokemons" :key="pokemon.id" class="pokemon-card" @click="goToPokemonDetail(pokemon.id)">
-          <img :src="pokemon.image" :alt="pokemon.name">
+        <div v-for="pokemon in pokemons" :key="pokemon.id" class="pokemon-card" @click="goToPokemonDetail(pokemon.id)" v-hightlight>
+          <img :src="pokemon.image" :alt="pokemon.name" class="pokemon-icon"/>
           <h3>{{ pokemon.name }}</h3>
           <p>{{ pokemon.price }} €</p>
           <button @click.stop="addToCart(pokemon)">Ajouter au panier</button>

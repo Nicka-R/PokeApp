@@ -10,8 +10,6 @@ app.use(createPinia())
 app.use(router)
 
 const store = usePokemonStore()
-// if(document.getElementById('currentPage'))
-// document.getElementById('currentPage').textContent = `Page: ${store.currentPage} / ${store.totalPages}`;
 
 // Initial fetch
 store.fetchPokemons().then()
