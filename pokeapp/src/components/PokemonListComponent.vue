@@ -10,12 +10,29 @@ export default {
   data() {
     return {
       pokemonStore: usePokemonStore(),
-      searchQuery: ''
+      searchQuery: '',
+      sortOrder: 'asc',
+      selectedType: '',
+      pokemonTypes: []
     }
   },
   computed: {
     pokemons() {
-      return this.pokemonStore?.pokemons || []
+      let filteredPokemons = this.pokemonStore?.pokemons || []
+
+      if (this.selectedType) {
+        filteredPokemons = filteredPokemons.filter(pokemon =>
+          pokemon.types.includes(this.selectedType)
+        )
+      }
+
+      if (this.sortOrder === 'asc') {
+        filteredPokemons.sort((a, b) => a.name.localeCompare(b.name))
+      } else {
+        filteredPokemons.sort((a, b) => b.name.localeCompare(a.name))
+      }
+
+      return filteredPokemons
     },
     loading() {
       return this.pokemonStore?.loading
@@ -43,7 +60,18 @@ export default {
       }
       this.updateCurrentPage()
     },
+    async fetchPokemonTypes() {
+      try {
+        const types = await this.pokemonStore.fecthPokemonTypes()
+        this.pokemonTypes = types.map(type => type.name)
+      } catch (error) {
+        console.error('Failed to fetch Pokemon types:', error)
+      }
+    },
     searchPokemon() {
+      if (!this.searchQuery) {
+        return
+      }
       this.pokemonStore.searchPokemonByName(this.searchQuery)
       this.$router.push({ name: 'pokemon-list', query: { search: this.searchQuery } })
     },
@@ -62,10 +90,17 @@ export default {
     },
     updateCurrentPage() {
       document.getElementById('currentPage').textContent = `Page: ${this.pokemonStore.currentPage} / ${this.pokemonStore.totalPages}`
+    },
+    updateSortOrder(event) {
+      this.sortOrder = event.target.value
+    },
+    updateSelectedType(event) {
+      this.selectedType = event.target.value
     }
   },
-  created() {
+  async created() {
     this.pokemonStore.fetchPokemons()
+    await this.fetchPokemonTypes()
   },
   mounted() {
     this.updateCurrentPage()
@@ -79,6 +114,20 @@ export default {
       <img src="@/assets/icons/search.svg" alt="Rechercher" />
       <input type="text" v-model="searchQuery" placeholder="Rechercher un Pokémon" />
       <button @click="searchPokemon">Rechercher</button>
+    </div>
+
+    <div class="filters">
+      <label for="sortOrder">Trier par nom:</label>
+      <select id="sortOrder" v-model="sortOrder" @change="updateSortOrder">
+        <option value="asc">Croissant</option>
+        <option value="desc">Décroissant</option>
+      </select>
+
+      <label for="typeFilter">Filtrer par type:</label>
+      <select id="typeFilter" v-model="selectedType" @change="updateSelectedType">
+        <option value="">Tous</option>
+        <option v-for="type in pokemonTypes" :key="type" :value="type">{{ type }}</option>
+      </select>
     </div>
     
     <div class="home">

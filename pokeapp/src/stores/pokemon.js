@@ -88,7 +88,7 @@ export const usePokemonStore = defineStore('pokemon', {
           name: details.name,
           image: details.sprites.other.dream_world.front_default ?? details.sprites.front_default,
           price: details.base_experience,
-          type: details.types.map(typeInfo => typeInfo.type.name).join(', '),
+          types: details.types.map(typeInfo => typeInfo.type.name).join(', '),
           weight: details.weight / 10,
           height: details.height / 10,
           abilities: details.abilities.map(ability => ability.ability.name).join(', '),
@@ -99,6 +99,16 @@ export const usePokemonStore = defineStore('pokemon', {
         throw error
       }
     },
+
+    async fecthPokemonTypes() {
+      try {
+        const response = await request('/type')
+        return response.results
+      } catch (error) {
+        throw error
+      }
+    },
+
     async nextPage() {
       if (this.currentPage < this.totalPages) {
         this.currentPage += 1

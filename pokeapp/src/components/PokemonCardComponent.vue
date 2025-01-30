@@ -56,7 +56,7 @@ export default {
     <img :src="pokemon.image" :alt="pokemon.name">
     <h1>{{ pokemon.name }}</h1>
     <p>Prix: {{ pokemon.price }} €</p>
-    <p>Type: {{ pokemon.type }}</p>
+    <p>Type: {{ pokemon.types }}</p>
     <p>Poids: {{ pokemon.weight }} kg</p>
     <p>Taille: {{ pokemon.height }} m</p>
     <p>Abilites: {{ pokemon.abilities }}</p>
