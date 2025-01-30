@@ -1,38 +1,26 @@
 <script>
 import { usePokemonStore } from '@/stores/pokemon'
 import { useCartStore } from '@/stores/cart'
-import hightlight from '@/directive/hightlight';
+import highlight from '@/directive/hightlight'
+
 export default {
   name: 'PokemonListComponent',
   directives: {
-    hightlight
+    highlight
   },
   data() {
     return {
       pokemonStore: usePokemonStore(),
       searchQuery: '',
-      sortOrder: 'asc',
       selectedType: '',
       pokemonTypes: []
     }
   },
   computed: {
-    pokemons() {
-      let filteredPokemons = this.pokemonStore?.pokemons || []
-
-      if (this.selectedType) {
-        filteredPokemons = filteredPokemons.filter(pokemon =>
-          pokemon.types.includes(this.selectedType)
-        )
-      }
-
-      if (this.sortOrder === 'asc') {
-        filteredPokemons.sort((a, b) => a.name.localeCompare(b.name))
-      } else {
-        filteredPokemons.sort((a, b) => b.name.localeCompare(a.name))
-      }
-
-      return filteredPokemons
+    paginatedPokemons() {
+      const start = (this.pokemonStore.currentPage - 1) * this.pokemonStore.limit
+      const end = start + this.pokemonStore.limit
+      return this.pokemonStore.pokemons.slice(start, end)
     },
     loading() {
       return this.pokemonStore?.loading
@@ -41,24 +29,22 @@ export default {
       return this.pokemonStore?.error
     },
     currentPage() {
-      return this.pokemonStore?.currentPage
+      return this.pokemonStore.currentPage
     },
     totalPages() {
-      return this.pokemonStore?.totalPages
+      return this.pokemonStore.totalPages
     }
   },
   watch: {
-    '$route.query.search': 'fetchPokemons'
+    '$route.query.search': 'fetchPokemons',
+    selectedType: 'fetchPokemons',
   },
   methods: {
     async fetchPokemons() {
       const searchQuery = this.$route.query.search || ''
-      if (searchQuery) {
-        await this.pokemonStore.searchPokemonByName(searchQuery)
-      } else {
-        await this.pokemonStore.fetchPokemons(1)
-      }
-      this.updateCurrentPage()
+      const type = this.selectedType || ''
+      await this.pokemonStore.fetchPokemons(this.pokemonStore.currentPage, searchQuery, type)
+      this.updateTotalPages()
     },
     async fetchPokemonTypes() {
       try {
@@ -69,9 +55,6 @@ export default {
       }
     },
     searchPokemon() {
-      if (!this.searchQuery) {
-        return
-      }
       this.pokemonStore.searchPokemonByName(this.searchQuery)
       this.$router.push({ name: 'pokemon-list', query: { search: this.searchQuery } })
     },
@@ -83,27 +66,23 @@ export default {
       cartStore.addToCart(pokemon)
     },
     previousPage() {
-      this.pokemonStore.previousPage().then(this.updateCurrentPage)
+      this.pokemonStore.previousPage()
     },
     nextPage() {
-      this.pokemonStore.nextPage().then(this.updateCurrentPage)
+      this.pokemonStore.nextPage()
     },
-    updateCurrentPage() {
-      document.getElementById('currentPage').textContent = `Page: ${this.pokemonStore.currentPage} / ${this.pokemonStore.totalPages}`
-    },
-    updateSortOrder(event) {
-      this.sortOrder = event.target.value
+    updateTotalPages() {
+      this.totalPages = Math.ceil(this.pokemonStore.pokemons.length / this.pokemonStore.limit)
     },
     updateSelectedType(event) {
       this.selectedType = event.target.value
+      this.fetchPokemons()
     }
   },
   async created() {
-    this.pokemonStore.fetchPokemons()
+    await this.pokemonStore.fetchPokemons()
     await this.fetchPokemonTypes()
-  },
-  mounted() {
-    this.updateCurrentPage()
+    this.updateTotalPages()
   }
 }
 </script>
@@ -117,19 +96,13 @@ export default {
     </div>
 
     <div class="filters">
-      <label for="sortOrder">Trier par nom:</label>
-      <select id="sortOrder" v-model="sortOrder" @change="updateSortOrder">
-        <option value="asc">Croissant</option>
-        <option value="desc">Décroissant</option>
-      </select>
-
       <label for="typeFilter">Filtrer par type:</label>
       <select id="typeFilter" v-model="selectedType" @change="updateSelectedType">
         <option value="">Tous</option>
         <option v-for="type in pokemonTypes" :key="type" :value="type">{{ type }}</option>
       </select>
     </div>
-    
+
     <div class="home">
       <div v-if="loading" class="loading">
         Chargement des Pokémon...
@@ -138,7 +111,7 @@ export default {
         {{ error }}
       </div>
       <div v-else class="pokemon-grid">
-        <div v-for="pokemon in pokemons" :key="pokemon.id" class="pokemon-card" @click="goToPokemonDetail(pokemon.id)" v-hightlight>
+        <div v-for="pokemon in paginatedPokemons" :key="pokemon.id" class="pokemon-card" @click="goToPokemonDetail(pokemon.id)" v-highlight>
           <img :src="pokemon.image" :alt="pokemon.name" class="pokemon-icon"/>
           <h3>{{ pokemon.name }}</h3>
           <p>{{ pokemon.price }} €</p>
@@ -147,9 +120,9 @@ export default {
       </div>
     </div>
     <footer>
-      <button id="prevPage" @click="previousPage">Previous Page</button>
+      <button id="prevPage" @click="previousPage" :disabled="currentPage === 1">Previous Page</button>
       <span id="currentPage">Page : {{ currentPage }} / {{ totalPages }}</span>
-      <button id="nextPage" @click="nextPage">Next Page</button>
+      <button id="nextPage" @click="nextPage" :disabled="currentPage === totalPages">Next Page</button>
     </footer>
   </div>
 </template>
@@ -178,5 +151,26 @@ export default {
 .loading, .error {
   text-align: center;
   padding: 20px;
+}
+
+.filters {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.filters label {
+  margin-right: 10px;
+}
+
+footer {
+  display: flex;
+  /* justify-content: center; */
+  align-items: center;
+  margin-top: 20px;
+}
+
+footer button {
+  margin: 0 10px;
 }
 </style>

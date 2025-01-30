@@ -9,10 +9,11 @@ export const usePokemonStore = defineStore('pokemon', {
     currentPage: 1,
     totalPages: 0,
     limit: 24,
-    searchCache: new Map() 
+    searchCache: new Map(),
+    types: []
   }),
   actions: {
-    async fetchPokemons(page = 1, searchQuery = '') {
+    async fetchPokemons(page = 1, searchQuery = '', type = '') {
       this.loading = true
       this.currentPage = page
       const offset = (page - 1) * this.limit
@@ -23,6 +24,11 @@ export const usePokemonStore = defineStore('pokemon', {
           return
         }
 
+        if (type) {
+          await this.searchPokemonByType(type)
+          return
+        }
+
         const response = await request(`/pokemon?limit=${this.limit}&offset=${offset}`)
         const pokemonDetails = await Promise.all(
           response.results.map(async (pokemon) => {
@@ -30,7 +36,12 @@ export const usePokemonStore = defineStore('pokemon', {
           })
         )
 
-        this.pokemons = pokemonDetails
+        if (page === 1) {
+          this.pokemons = pokemonDetails
+        } else {
+          this.pokemons = [...this.pokemons, ...pokemonDetails]
+        }
+
         this.totalPages = Math.ceil(response.count / this.limit)
       } catch (error) {
         this.error = error.message
@@ -44,7 +55,6 @@ export const usePokemonStore = defineStore('pokemon', {
       const searchTerm = name.toLowerCase()
 
       try {
-        // utilisation du cache pour ne pas faire trop de requêtes
         if (this.searchCache.has(searchTerm)) {
           this.pokemons = this.searchCache.get(searchTerm)
           return
@@ -80,6 +90,27 @@ export const usePokemonStore = defineStore('pokemon', {
       }
     },
 
+    async searchPokemonByType(type) {
+      this.loading = true
+
+      try {
+        const response = await request(`/type/${type}`)
+        const pokemonDetails = await Promise.all(
+          response.pokemon.map(async (p) => {
+            return this.fetchPokemonDetails(p.pokemon.url.split('/').slice(-2, -1)[0])
+          })
+        )
+
+        this.pokemons = pokemonDetails
+        this.totalPages = Math.ceil(this.pokemons.length / this.limit)
+      } catch (error) {
+        this.error = `Aucun Pokémon trouvé avec le type ${type}`
+        this.pokemons = []
+      } finally {
+        this.loading = false
+      }
+    },
+
     async fetchPokemonDetails(id) {
       try {
         const details = await request(`/pokemon/${id}`)
@@ -88,12 +119,11 @@ export const usePokemonStore = defineStore('pokemon', {
           name: details.name,
           image: details.sprites.other.dream_world.front_default ?? details.sprites.front_default,
           price: details.base_experience,
-          types: details.types.map(typeInfo => typeInfo.type.name).join(', '),
+          type: details.types.map(typeInfo => typeInfo.type.name).join(', '),
           weight: details.weight / 10,
           height: details.height / 10,
           abilities: details.abilities.map(ability => ability.ability.name).join(', '),
           moves: details.moves.map(moveInfo => moveInfo.move.name).slice(0, 5).join(', ')
-
         }
       } catch (error) {
         throw error
@@ -103,7 +133,8 @@ export const usePokemonStore = defineStore('pokemon', {
     async fecthPokemonTypes() {
       try {
         const response = await request('/type')
-        return response.results
+        this.types = response.results
+        return this.types
       } catch (error) {
         throw error
       }
@@ -112,13 +143,13 @@ export const usePokemonStore = defineStore('pokemon', {
     async nextPage() {
       if (this.currentPage < this.totalPages) {
         this.currentPage += 1
-        this.fetchPokemons(this.currentPage)
+        await this.fetchPokemons(this.currentPage)
       }
     },
     async previousPage() {
       if (this.currentPage > 1) {
         this.currentPage -= 1
-        this.fetchPokemons(this.currentPage)
+        await this.fetchPokemons(this.currentPage)
       }
     }
   }
