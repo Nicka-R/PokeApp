@@ -20,11 +20,6 @@ export const usePokemonStore = defineStore('pokemon', {
       const cacheKey = `pokemons_${page}_${searchQuery}_${type}`
 
       try {
-        if (this.searchCache.has(cacheKey)) {
-          this.pokemons = this.searchCache.get(cacheKey)
-          this.totalCount = this.pokemons.length
-          return
-        }
 
         if (searchQuery) {
           await this.searchPokemonByName(searchQuery)

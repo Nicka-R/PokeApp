@@ -26,7 +26,7 @@ export default {
 <template>
   <div class="order-form">
   <router-link to="/">
-    <span>< Retour</span>
+    <span class="return-link">< Retour</span>
   </router-link>
     <h1>Passer la commande</h1>
     <form @submit.prevent="submitOrder" name="orderForm">

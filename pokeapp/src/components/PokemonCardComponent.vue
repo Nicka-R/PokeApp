@@ -5,18 +5,18 @@ import '@/assets/css/pokemon-details.css'
 
 export default {
   name: 'PokemonCardComponent',
-  data() {
-    return {
-      pokemonStore: null,
-      pokemon: null,
-      loading: false,
-      error: null
-    }
-  },
   props: {
     pokemon: {
       type: Object,
       required: true
+    }
+  },
+  data() {
+    return {
+      pokemonStore: null,
+      loading: false,
+      error: null,
+      pokemonDetails: this.pokemon
     }
   },
   async created() {
@@ -28,7 +28,7 @@ export default {
       this.loading = true
       const pokemonId = this.$route.params.id
       try {
-        this.pokemon = await this.pokemonStore.fetchPokemonDetails(pokemonId)
+        this.pokemonDetails = await this.pokemonStore.fetchPokemonDetails(pokemonId)
       } catch (error) {
         this.error = error.message
       } finally {
@@ -37,7 +37,7 @@ export default {
     },
     addToCart() {
       const store = useCartStore()
-      store.addToCart(this.pokemon)
+      store.addToCart(this.pokemonDetails)
     }
   }
 }
@@ -45,7 +45,7 @@ export default {
 
 <template>
   <router-link to="/">
-    <span>< Retour</span>
+    <span class="return-link">< Retour</span>
   </router-link>
   <div v-if="loading" class="loading">
     Chargement des détails du Pokémon...
@@ -53,20 +53,20 @@ export default {
   <div v-else-if="error" class="error">
     {{ error }}
   </div>
-  <div v-else-if="pokemon" class="pokemon-detail">
-    <img :src="pokemon.image" :alt="pokemon.name">
+  <div v-else-if="pokemonDetails" class="pokemon-detail">
+    <img :src="pokemonDetails.image" :alt="pokemonDetails.name">
     <div class="pokemon-info">
       <div class="pokemon-header">
-        <div class="pokemon-name">{{ pokemon.name }}</div>
+        <div class="pokemon-name">{{ pokemonDetails.name }}</div>
         <div class="pokemon-type">
-          <img v-for="type in pokemon.types" :key="type" :alt="type" :src="`/src/assets/tags/${type}.svg`"/>
+          <img v-for="type in pokemonDetails.types" :key="type" :alt="type" :src="`/src/assets/tags/${type}.svg`"/>
         </div>
       </div>
-      <p><strong>Prix:</strong> {{ pokemon.price }} €</p>
-      <p><strong>Poids:</strong> {{ pokemon.weight }} kg</p>
-      <p><strong>Taille:</strong> {{ pokemon.height }} m</p>
-      <p class="abilities"><strong>Capacités:</strong> {{ pokemon.abilities }}</p>
-      <p class="moves"><strong>Attaques:</strong> {{ pokemon.moves}}</p>
+      <p><strong>Prix:</strong> {{ pokemonDetails.price }} €</p>
+      <p><strong>Poids:</strong> {{ pokemonDetails.weight }} kg</p>
+      <p><strong>Taille:</strong> {{ pokemonDetails.height }} m</p>
+      <p class="abilities"><strong>Capacités:</strong> {{ pokemonDetails.abilities }}</p>
+      <p class="moves"><strong>Attaques:</strong> {{ pokemonDetails.moves}}</p>
       <button @click="addToCart">Ajouter au panier</button>
     </div>
   </div>

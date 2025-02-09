@@ -28,7 +28,7 @@ export default {
 
 <template>
   <router-link to="/">
-    <span>< Retour</span>
+    <span class="return-link">< Retour</span>
   </router-link>
   <div class="cart-view">
     <h1>Mon Panier</h1>
