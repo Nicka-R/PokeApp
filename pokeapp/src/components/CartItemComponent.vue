@@ -36,15 +36,4 @@ export default {
 </template>
 
 <style>
-.cart-item {
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.cart-item img {
-  width: 50px;
-  height: 50px;
-  margin-right: 10px;
-}
 </style>

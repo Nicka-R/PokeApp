@@ -27,7 +27,9 @@ export default {
 </script>
 
 <template>
-  <router-link to="/"><button>Retour à la liste des pokémons</button></router-link>
+  <router-link to="/">
+    <span>< Retour</span>
+  </router-link>
   <div class="cart-view">
     <h1>Mon Panier</h1>
     <div v-if="cartItems.length === 0">

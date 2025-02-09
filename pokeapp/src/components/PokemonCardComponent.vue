@@ -1,6 +1,7 @@
 <script>
 import { useCartStore } from '@/stores/cart'
 import { usePokemonStore } from '@/stores/pokemon'
+import '@/assets/css/pokemon-details.css'
 
 export default {
   name: 'PokemonCardComponent',
@@ -44,7 +45,7 @@ export default {
 
 <template>
   <router-link to="/">
-    <button>Retour</button>
+    <span>< Retour</span>
   </router-link>
   <div v-if="loading" class="loading">
     Chargement des détails du Pokémon...
@@ -54,32 +55,19 @@ export default {
   </div>
   <div v-else-if="pokemon" class="pokemon-detail">
     <img :src="pokemon.image" :alt="pokemon.name">
-    <h1>{{ pokemon.name }}</h1>
-    <p>Prix: {{ pokemon.price }} €</p>
-    <p>Type: {{ pokemon.types }}</p>
-    <p>Poids: {{ pokemon.weight }} kg</p>
-    <p>Taille: {{ pokemon.height }} m</p>
-    <p>Abilites: {{ pokemon.abilities }}</p>
-    <p>Moves: {{ pokemon.moves }}</p>
-  </div>
-  <div>
-    <button @click="addToCart">Ajouter au panier</button>
+    <div class="pokemon-info">
+      <div class="pokemon-header">
+        <div class="pokemon-name">{{ pokemon.name }}</div>
+        <div class="pokemon-type">
+          <img v-for="type in pokemon.types" :key="type" :alt="type" :src="`/src/assets/tags/${type}.svg`"/>
+        </div>
+      </div>
+      <p><strong>Prix:</strong> {{ pokemon.price }} €</p>
+      <p><strong>Poids:</strong> {{ pokemon.weight }} kg</p>
+      <p><strong>Taille:</strong> {{ pokemon.height }} m</p>
+      <p class="abilities"><strong>Capacités:</strong> {{ pokemon.abilities }}</p>
+      <p class="moves"><strong>Attaques:</strong> {{ pokemon.moves}}</p>
+      <button @click="addToCart">Ajouter au panier</button>
+    </div>
   </div>
 </template>
-
-<style>
-.pokemon-detail {
-  text-align: center;
-  padding: 20px;
-}
-
-.pokemon-detail img {
-  width: 200px;
-  height: 200px;
-}
-
-.loading, .error {
-  text-align: center;
-  padding: 20px;
-}
-</style>

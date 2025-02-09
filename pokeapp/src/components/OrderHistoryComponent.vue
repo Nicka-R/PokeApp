@@ -14,6 +14,9 @@ export default {
 
 <template>
   <div class="order-history">
+    <router-link to="/">
+      <span>< Retour</span>
+    </router-link>
     <h1>Historique des Commandes</h1>
     <div v-if="orderHistory.length === 0">
       <p>Aucune commande passée.</p>

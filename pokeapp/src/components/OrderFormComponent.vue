@@ -25,8 +25,11 @@ export default {
 
 <template>
   <div class="order-form">
+  <router-link to="/">
+    <span>< Retour</span>
+  </router-link>
     <h1>Passer la commande</h1>
-    <form @submit.prevent="submitOrder">
+    <form @submit.prevent="submitOrder" name="orderForm">
       <div>
         <label for="firstName">Prénom:</label>
         <input type="text" id="firstName" v-model="firstName" required />

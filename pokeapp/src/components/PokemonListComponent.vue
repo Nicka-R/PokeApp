@@ -2,6 +2,7 @@
 import { usePokemonStore } from '@/stores/pokemon'
 import { useCartStore } from '@/stores/cart'
 import highlight from '@/directive/hightlight'
+import '@/assets/css/pokemon-list.css'
 
 export default {
   name: 'PokemonListComponent',
@@ -13,7 +14,8 @@ export default {
       pokemonStore: usePokemonStore(),
       searchQuery: '',
       selectedType: '',
-      pokemonTypes: []
+      typeFilter: false,
+      pokemonTypes: [],
     }
   },
   computed: {
@@ -32,7 +34,7 @@ export default {
       return this.pokemonStore.currentPage
     },
     totalPages() {
-      return this.pokemonStore.totalPages
+      return Math.ceil(this.pokemonStore.totalCount / this.pokemonStore.limit)
     }
   },
   watch: {
@@ -41,10 +43,9 @@ export default {
   },
   methods: {
     async fetchPokemons() {
-      const searchQuery = this.$route.query.search || ''
+      const searchQuery = this.searchQuery || ''
       const type = this.selectedType || ''
       await this.pokemonStore.fetchPokemons(this.pokemonStore.currentPage, searchQuery, type)
-      this.updateTotalPages()
     },
     async fetchPokemonTypes() {
       try {
@@ -55,8 +56,9 @@ export default {
       }
     },
     searchPokemon() {
-      this.pokemonStore.searchPokemonByName(this.searchQuery)
-      this.$router.push({ name: 'pokemon-list', query: { search: this.searchQuery } })
+      this.selectedType = ''
+      this.updateURL()
+      this.fetchPokemons()
     },
     goToPokemonDetail(id) {
       this.$router.push({ name: 'pokemon-detail', params: { id } })
@@ -65,42 +67,61 @@ export default {
       const cartStore = useCartStore()
       cartStore.addToCart(pokemon)
     },
-    previousPage() {
-      this.pokemonStore.previousPage()
+    async previousPage() {
+      if (this.pokemonStore.currentPage > 1) {
+        this.pokemonStore.currentPage -= 1
+        await this.fetchPokemons()
+        this.updateURL()
+      }
     },
-    nextPage() {
-      this.pokemonStore.nextPage()
+    async nextPage() {
+      if (this.pokemonStore.currentPage < this.totalPages) {
+        this.pokemonStore.currentPage += 1
+        await this.fetchPokemons()
+        this.updateURL()
+      }
     },
-    updateTotalPages() {
-      this.totalPages = Math.ceil(this.pokemonStore.pokemons.length / this.pokemonStore.limit)
+    toggleTypeFilter() {
+      this.typeFilter = !this.typeFilter
     },
     updateSelectedType(event) {
-      this.selectedType = event.target.value
+      this.searchQuery = ''
+      this.selectedType = event.target.getAttribute('value')
+      this.pokemonStore.currentPage = 1 // Reset to page 1
+      this.updateURL()
       this.fetchPokemons()
-    }
+    },
+    updateURL() {
+      this.$router.push({ name: 'pokemon-list', query: { search: this.searchQuery, type: this.selectedType, page: this.pokemonStore.currentPage } })
+    },
   },
   async created() {
     await this.pokemonStore.fetchPokemons()
     await this.fetchPokemonTypes()
-    this.updateTotalPages()
-  }
+  },
 }
 </script>
 
 <template>
   <div>
-    <div class="searchBar">
-      <img src="@/assets/icons/search.svg" alt="Rechercher" />
-      <input type="text" v-model="searchQuery" placeholder="Rechercher un Pokémon" />
-      <button @click="searchPokemon">Rechercher</button>
-    </div>
+    <div class="search-container">
+      <div class="searchBar">
+        <img src="@/assets/icons/search.svg" alt="Rechercher" />
+        <input name="search-pokemon" type="text" v-model="searchQuery" placeholder="Rechercher un Pokémon" />
+        <button @click="searchPokemon">Rechercher</button>
+      </div>
 
-    <div class="filters">
-      <label for="typeFilter">Filtrer par type:</label>
-      <select id="typeFilter" v-model="selectedType" @change="updateSelectedType">
-        <option value="">Tous</option>
-        <option v-for="type in pokemonTypes" :key="type" :value="type">{{ type }}</option>
-      </select>
+      <div class="filters">
+        <div id="typeFilter">
+          <button @click="toggleTypeFilter">Filtrer par type</button>
+          <div class="typeFilter" v-show="typeFilter">
+            <div class="select-default" value="" @click="updateSelectedType($event)">Tous</div>
+            <div v-for="type in pokemonTypes" :key="type" @click="updateSelectedType($event)">
+              <img :src="`./src/assets/tags/${type}.svg`" :alt="type" :value="type" />
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="home">
@@ -112,65 +133,28 @@ export default {
       </div>
       <div v-else class="pokemon-grid">
         <div v-for="pokemon in paginatedPokemons" :key="pokemon.id" class="pokemon-card" @click="goToPokemonDetail(pokemon.id)" v-highlight>
+          <div class="pokemon-header">
+            <span class="pokemon-id">#{{ pokemon.id }}</span>
+            <div v-if="pokemon.types.length === 1" class="pokemon-type">
+              <img :src="`./src/assets/tags/${pokemon.types[0]}.svg`" :alt="pokemon.types[0]" class="pokemon-type"/>
+            </div>
+            <div v-else class="pokemon-types">
+              <img v-for="type in pokemon.types" :key="type" :alt="type" class="pokemon-type" :src="`./src/assets/types/${type}.svg`"/>
+            </div>
+          </div>
           <img :src="pokemon.image" :alt="pokemon.name" class="pokemon-icon"/>
-          <h3>{{ pokemon.name }}</h3>
-          <p>{{ pokemon.price }} €</p>
+          <div class="pokemon-details">
+            <span class="pokemon-name">{{ pokemon.name }}</span>
+            <span>{{ pokemon.price }}€</span>
+          </div>
           <button @click.stop="addToCart(pokemon)">Ajouter au panier</button>
         </div>
       </div>
     </div>
     <footer>
-      <button id="prevPage" @click="previousPage" :disabled="currentPage === 1">Previous Page</button>
+      <button id="prevPage" @click="previousPage">Previous Page</button>
       <span id="currentPage">Page : {{ currentPage }} / {{ totalPages }}</span>
-      <button id="nextPage" @click="nextPage" :disabled="currentPage === totalPages">Next Page</button>
+      <button id="nextPage" @click="nextPage">Next Page</button>
     </footer>
   </div>
 </template>
-
-<style>
-.pokemon-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 20px;
-  padding: 20px;
-}
-
-.pokemon-card {
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 15px;
-  text-align: center;
-  background-color: #fff;
-}
-
-.pokemon-card img {
-  width: 120px;
-  height: 120px;
-}
-
-.loading, .error {
-  text-align: center;
-  padding: 20px;
-}
-
-.filters {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 20px;
-}
-
-.filters label {
-  margin-right: 10px;
-}
-
-footer {
-  display: flex;
-  /* justify-content: center; */
-  align-items: center;
-  margin-top: 20px;
-}
-
-footer button {
-  margin: 0 10px;
-}
-</style>

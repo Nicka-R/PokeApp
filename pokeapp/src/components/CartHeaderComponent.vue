@@ -1,5 +1,6 @@
 <script>
 import { useCartStore } from '@/stores/cart'
+import '@/assets/css/header.css'
 
 export default {
   name: 'CartHeaderComponent',
@@ -14,12 +15,11 @@ export default {
 </script>
 
 <template>
-    <router-link to="/"><h1>Pokéapp</h1></router-link>
+  <router-link to="/order-history"><span>Historique des commandes</span></router-link>
     <router-link to="/cart">
-      <div>
-        <img src="../assets/icons/cart.svg" alt="Panier" />
-        <span>{{ cartItemCount }}</span>
-      </div>
-      <router-link to="/order-history">Historique des commandes</router-link>
+      <div class="cart-icon-container">
+      <img src="../assets/icons/cart.svg" alt="Panier" />
+      <span class="cart-item-count">{{ cartItemCount }}</span>
+    </div>
     </router-link>
 </template>
