@@ -71,8 +71,6 @@ export default {
       if (this.pokemonStore.currentPage > 1) {
         this.pokemonStore.currentPage -= 1
         await this.fetchPokemons()
-        console.log(this.pokemonStore.currentPage)
-        console.log(this.totalPages)
         this.updateURL()
       }
     },
