@@ -28,7 +28,8 @@ export const useCartStore = defineStore('cart', {
         const order = {
           id: Date.now(),
           date: new Date().toLocaleString(),
-          items: [...this.items]
+          items: [...this.items],
+          total: this.items.reduce((total, item) => total + item.price * item.quantity, 0)
         }
         this.orderHistory.push(order)
         this.clearCart()
