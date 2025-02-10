@@ -24,10 +24,10 @@ export default {
 </script>
 
 <template>
-  <div class="order-form">
   <router-link to="/">
     <span class="return-link">< Retour</span>
   </router-link>
+  <div class="order-form">
     <h1>Passer la commande</h1>
     <form @submit.prevent="submitOrder" name="orderForm">
       <div>

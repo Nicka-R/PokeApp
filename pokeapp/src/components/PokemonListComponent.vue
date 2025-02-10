@@ -109,9 +109,7 @@ export default {
         <img src="@/assets/icons/search.svg" alt="Rechercher" />
         <input name="search-pokemon" type="text" v-model="searchQuery" placeholder="Rechercher un Pokémon" />
         <button @click="searchPokemon">Rechercher</button>
-      </div>
-
-      <div class="filters">
+        <div class="filters">
         <div id="typeFilter">
           <button @click="toggleTypeFilter">Filtrer par type</button>
           <div class="typeFilter" v-show="typeFilter">
@@ -121,6 +119,7 @@ export default {
             </div>
           </div>
         </div>
+      </div>
       </div>
     </div>
 
