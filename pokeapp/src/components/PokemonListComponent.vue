@@ -12,6 +12,7 @@ export default {
   data() {
     return {
       pokemonStore: usePokemonStore(),
+      cartStore: useCartStore(),
       searchQuery: '',
       selectedType: '',
       typeFilter: false,
@@ -35,6 +36,11 @@ export default {
     },
     totalPages() {
       return Math.ceil(this.pokemonStore.totalCount / this.pokemonStore.limit)
+    },
+    isInCart() {
+      return (pokemonId) => {
+        return this.cartStore.items.some(item => item.id === pokemonId)
+      }
     }
   },
   watch: {
@@ -64,8 +70,7 @@ export default {
       this.$router.push({ name: 'pokemon-detail', params: { id } })
     },
     addToCart(pokemon) {
-      const cartStore = useCartStore()
-      cartStore.addToCart(pokemon)
+      this.cartStore.addToCart(pokemon)
     },
     async previousPage() {
       if (this.pokemonStore.currentPage > 1) {
@@ -87,7 +92,7 @@ export default {
     updateSelectedType(event) {
       this.searchQuery = ''
       this.selectedType = event.target.getAttribute('value')
-      this.pokemonStore.currentPage = 1 // Reset to page 1
+      this.pokemonStore.currentPage = 1
       this.updateURL()
       this.fetchPokemons()
     },
@@ -146,7 +151,8 @@ export default {
             <span class="pokemon-name">{{ pokemon.name }}</span>
             <span>{{ pokemon.price }}€</span>
           </div>
-          <button @click.stop="addToCart(pokemon)">Ajouter au panier</button>
+          <button v-if="isInCart(pokemon.id)" @click.stop="$router.push('/cart')" style="background-color:#11bb7a">Voir dans le panier</button>
+          <button v-else @click.stop="addToCart(pokemon)" >Ajouter au panier</button>
         </div>
       </div>
     </div>
