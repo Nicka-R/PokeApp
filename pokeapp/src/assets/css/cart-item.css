@@ -166,6 +166,13 @@
     gap: 20px;
 }
 
+@media screen and (max-width: 730px) {
+    .cart-content{
+        flex-direction: column;
+    }
+    
+}
+
 .total-price {
     display: flex;
     flex-direction: column;
@@ -185,6 +192,10 @@
         font-size: 1.2em;
         font-weight: bold;
         color: #333;
+    }
+
+    @media screen and (max-width: 730px) {
+        width: unset;
     }
 }
 

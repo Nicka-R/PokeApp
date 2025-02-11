@@ -1,7 +1,6 @@
 header {
     background-color: #e9283e;
     border-bottom: 2px solid #000000;
-    position: sticky;
     top: 0;
     z-index: 1000;
 
@@ -66,6 +65,10 @@ header {
             font-family: 'Press Start 2P', cursive;
 
             text-shadow: 2px 2px 4px #000000;
+
+            @media screen and (max-width: 768px) {
+                font-size: 2em;
+            }
         }
     }
 }

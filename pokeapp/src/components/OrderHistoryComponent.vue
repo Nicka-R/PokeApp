@@ -30,7 +30,7 @@ export default {
           </li>
         </ul>
         <div>
-          <span>Total: {{ order.total }} €</span> 
+          <span><strong>Total: {{ order.total }} €</strong></span> 
         </div>  
       </div>
     </div>
@@ -74,6 +74,10 @@ export default {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 20px;
+
+  @media screen and (max-width: 600px) {
+    grid-template-columns: 1fr;
+  }
 }
 
 .order {
@@ -87,6 +91,11 @@ export default {
   justify-content: space-between;
   height: 100%;
   max-height: 400px;
+
+  @media screen and (max-width: 600px) {
+    height: auto;
+    
+  }
 }
 
 .order h2 {

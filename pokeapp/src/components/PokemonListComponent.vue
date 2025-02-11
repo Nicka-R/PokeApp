@@ -151,9 +151,9 @@ export default {
       </div>
     </div>
     <footer>
-      <button id="prevPage" @click="previousPage">Previous Page</button>
+      <button id="prevPage" @click="previousPage">Précédent Page</button>
       <span id="currentPage">Page : {{ currentPage }} / {{ totalPages }}</span>
-      <button id="nextPage" @click="nextPage">Next Page</button>
+      <button id="nextPage" @click="nextPage">Suivant</button>
     </footer>
   </div>
 </template>
