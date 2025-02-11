@@ -6,102 +6,174 @@ export const usePokemonStore = defineStore('pokemon', {
     pokemons: [],
     loading: false,
     error: null,
-    currentPage: null,
-    totalPages: 0,
-    limit: 24
+    currentPage: 1,
+    totalCount: 0,
+    limit: 24,
+    searchCache: new Map(),
+    types: []
   }),
   actions: {
-    async fetchPokemons(page = 1, searchQuery = '') {
+    async fetchPokemons(page = 1, searchQuery = '', type = '') {
       this.loading = true
       this.currentPage = page
       const offset = (page - 1) * this.limit
+      const cacheKey = `pokemons_${page}_${searchQuery}_${type}`
+
       try {
-        const response = await request(`/pokemon?limit=${this.limit}&offset=${offset}`);
-        let pokemonDetails = await Promise.all(
+
+        if (searchQuery) {
+          await this.searchPokemonByName(searchQuery)
+          return
+        }
+
+        if (type) {
+          await this.searchPokemonByType(type)
+          return
+        }
+
+        const response = await request(`/pokemon?limit=${this.limit}&offset=${offset}`)
+        const pokemonDetails = await Promise.all(
           response.results.map(async (pokemon) => {
-            const details = await request(pokemon.url.replace('https://pokeapi.co/api/v2', ''));
-            return {
-              id: details.id,
-              name: details.name,
-              image: details.sprites.front_default,
-              price: details.base_experience
-            }
+            return this.fetchPokemonDetails(pokemon.url.split('/').slice(-2, -1)[0])
           })
         )
-        if (searchQuery) {
-          pokemonDetails = pokemonDetails.filter(pokemon => pokemon.name.toLowerCase().includes(searchQuery.toLowerCase()))
+
+        if (page === 1) {
+          this.pokemons = pokemonDetails
+        } else {
+          this.pokemons = [...this.pokemons, ...pokemonDetails]
         }
-        this.pokemons = pokemonDetails;
-        this.totalPages = Math.ceil(response.count / this.limit);
+
+        this.totalCount = response.count
+        this.searchCache.set(cacheKey, this.pokemons)
       } catch (error) {
         this.error = error.message
       } finally {
         this.loading = false
       }
     },
+
     async searchPokemonByName(name) {
       this.loading = true
-      try {
-        let allPokemonDetails = []
-        let offset = 0
-        const limit = 300
-        let hasMore = true
+      const searchTerm = name.toLowerCase()
+      const cacheKey = `search_${searchTerm}`
 
-        while (hasMore) {
-          const response = await request(`/pokemon?limit=${limit}&offset=${offset}`)
-          const pokemonDetails = await Promise.all(
-            response.results.map(async (pokemon) => {
-              const details = await request(pokemon.url.replace('https://pokeapi.co/api/v2', ''))
-              return {
-                id: details.id,
-                name: details.name,
-                image: details.sprites.front_default,
-                price: details.base_experience
-              }
-            })
-          )
-          allPokemonDetails = allPokemonDetails.concat(pokemonDetails)
-          offset += limit
-          hasMore = response.results.length === limit
+      try {
+        if (this.searchCache.has(cacheKey)) {
+          this.pokemons = this.searchCache.get(cacheKey)
+          this.totalCount = this.pokemons.length
+          return
         }
 
-        this.pokemons = allPokemonDetails.filter(pokemon => pokemon.name.toLowerCase().includes(name.toLowerCase()))
+        const response = await request(`/pokemon/${searchTerm}`)
+        const pokemon = await this.fetchPokemonDetails(response.id)
+        
+        this.pokemons = [pokemon]
+        this.totalCount = this.pokemons.length
+        this.searchCache.set(cacheKey, this.pokemons)
+        
       } catch (error) {
-        this.error = "No Pokémon found with that name"
+        try {
+          const response = await request('/pokemon?limit=100&offset=0')
+          const filteredResults = response.results.filter(p => 
+            p.name.includes(searchTerm)
+          )
+
+          const pokemonDetails = await Promise.all(
+            filteredResults.slice(0, 10).map(pokemon => 
+              this.fetchPokemonDetails(pokemon.url.split('/').slice(-2, -1)[0])
+            )
+          )
+
+          this.pokemons = pokemonDetails
+          this.totalCount = this.pokemons.length
+          this.searchCache.set(cacheKey, pokemonDetails)
+        } catch (secondError) {
+          this.error = "Aucun Pokémon trouvé avec ce nom"
+          this.pokemons = []
+          this.totalCount = 0
+        }
       } finally {
         this.loading = false
       }
     },
-    async fetchPokemonDetails(id) {
+
+    async searchPokemonByType(type) {
       this.loading = true
+      const cacheKey = `type_${type}`
+
+      try {
+        if (this.searchCache.has(cacheKey)) {
+          this.pokemons = this.searchCache.get(cacheKey)
+          this.totalCount = this.pokemons.length
+          return
+        }
+
+        const response = await request(`/type/${type}`)
+        const pokemonDetails = await Promise.all(
+          response.pokemon.map(async (p) => {
+            return this.fetchPokemonDetails(p.pokemon.url.split('/').slice(-2, -1)[0])
+          })
+        )
+
+        this.pokemons = pokemonDetails
+        this.totalCount = this.pokemons.length
+        this.searchCache.set(cacheKey, pokemonDetails)
+      } catch (error) {
+        this.error = `Aucun Pokémon trouvé avec le type ${type}`
+        this.pokemons = []
+        this.totalCount = 0
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async fetchPokemonDetails(id) {
+      const cacheKey = `details_${id}`
+      if (this.searchCache.has(cacheKey)) {
+        return this.searchCache.get(cacheKey)
+      }
+
       try {
         const details = await request(`/pokemon/${id}`)
-        return {
+        const pokemon = {
           id: details.id,
           name: details.name,
-          image: details.sprites.front_default,
+          image: details.sprites.other.dream_world.front_default ?? details.sprites.front_default,
           price: details.base_experience,
-          type: details.types.map(typeInfo => typeInfo.type.name).join(', '),
-          weight: details.weight / 10, 
-          height: details.height / 10
+          types: details.types.map(typeInfo => typeInfo.type.name),
+          weight: details.weight / 10,
+          height: details.height / 10,
+          abilities: details.abilities.map(ability => ability.ability.name).join(', '),
+          moves: details.moves.map(moveInfo => moveInfo.move.name).slice(0, 5).join(', ')
         }
+        this.searchCache.set(cacheKey, pokemon)
+        return pokemon
       } catch (error) {
-        this.error = error.message
         throw error
-      } finally {
-        this.loading = false
       }
     },
+
+    async fecthPokemonTypes() {
+      try {
+        const response = await request('/type')
+        this.types = response.results.slice(0, -2)
+        return this.types
+      } catch (error) {
+        throw error
+      }
+    },
+
     async nextPage() {
       if (this.currentPage < this.totalPages) {
         this.currentPage += 1
-        this.fetchPokemons(this.currentPage)
+        await this.fetchPokemons(this.currentPage)
       }
     },
     async previousPage() {
       if (this.currentPage > 1) {
         this.currentPage -= 1
-        this.fetchPokemons(this.currentPage)
+        await this.fetchPokemons(this.currentPage)
       }
     }
   }
